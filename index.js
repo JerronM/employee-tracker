@@ -371,3 +371,24 @@ async function addDepartment() {
 };
 
 
+//remove  department
+async function removeDepartment() {
+    let departments = await db.query('SELECT id, name FROM department');
+    departments.push({ id: null, name: "Cancel" });
+    inquirer.prompt([
+        {
+            name: "depName",
+            type: "list",
+            message: "Remove which department?",
+            choices: departments.map(obj => obj.name)
+        }
+    ]).then(response => {
+        if (response.depName != "Cancel") {
+            let uselessDepartment = departments.find(obj => obj.name === response.depName);
+            db.query("DELETE FROM department WHERE id=?", uselessDepartment.id);
+            console.log("\x1b[32m", `${response.depName} was removed. Please reassign associated roles.`);
+        }
+        runApp();
+    })
+};
+
