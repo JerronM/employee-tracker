@@ -95,3 +95,83 @@ async function showRoleSummary() {
         runApp();
     })
 };
+
+
+// existing departments
+async function showDepartments() {
+    console.log(' ');
+    await db.query('SELECT id, name AS department FROM department', (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        runApp();
+    })
+};
+
+// prevents null values
+async function confirmStringInput(input) {
+    if ((input.trim() != "") && (input.trim().length <= 30)) {
+        return true;
+    }
+    return "Invalid input. Please limit your input to 30 characters or less."
+};
+
+// add new employee
+async function addEmployee() {
+    let positions = await db.query('SELECT id, title FROM role');
+    let managers = await db.query('SELECT id, CONCAT(first_name, " ", last_name) AS Manager FROM employee');
+    managers.unshift({ id: null, Manager: "None" });
+    inquirer.prompt([
+        {
+            name: "firstName",
+            type: "input",
+            message: "Enter employee's first name:",
+            validate: confirmStringInput
+        },
+        {
+            name: "lastName",
+            type: "input",
+            message: "Enter employee's last name:",
+            validate: confirmStringInput
+        },
+        {
+            name: "role",
+            type: "list",
+            message: "Choose employee role:",
+            choices: positions.map(obj => obj.title)
+        },
+        {
+            name: "manager",
+            type: "list",
+            message: "Choose the employee's manager:",
+            choices: managers.map(obj => obj.Manager)
+        }
+    ]).then(answers => {
+        let positionDetails = positions.find(obj => obj.title === answers.role);
+        let manager = managers.find(obj => obj.Manager === answers.manager);
+        db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?)", [[answers.firstName.trim(), answers.lastName.trim(), positionDetails.id, manager.id]]);
+        console.log("\x1b[32m", `${answers.firstName} was added to the employee database!`);
+        runApp();
+    });
+};
+
+// removes employee 
+async function removeEmployee() {
+    let employees = await db.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employee');
+    employees.push({ id: null, name: "Cancel" });
+
+    inquirer.prompt([
+        {
+            name: "employeeName",
+            type: "list",
+            message: "Remove which employee?",
+            choices: employees.map(obj => obj.name)
+        }
+    ]).then(response => {
+        if (response.employeeName != "Cancel") {
+            let unluckyEmployee = employees.find(obj => obj.name === response.employeeName);
+            db.query("DELETE FROM employee WHERE id=?", unluckyEmployee.id);
+            console.log("\x1b[32m", `${response.employeeName} was let go...`);
+        }
+        runApp();
+    })
+};
