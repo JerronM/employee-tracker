@@ -1,6 +1,11 @@
 # Employee Tracker
 
 
+## Description
+Node & Express command line application connected to a mySQL database. Content Management System
+used to view employees, roles, and departments. Functionalities include update roles, departments and employee managers, as well as add new employees, roles, and departments.
+
+
 
 ## Demo
 Click the gif below to see the full demonstration:
