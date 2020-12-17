@@ -33,7 +33,7 @@ const db = new Database({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "",
+    password: "Mia46louise",
     database: "employee_db"
 });
 
@@ -482,3 +482,8 @@ function editDepartmentOptions() {
         }
     })
 };
+
+
+runApp();
+
+
